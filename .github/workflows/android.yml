@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04 # Força uma versão mais antiga do Linux no servidor
+    runs-on: ubuntu-20.04
 
     steps:
     - name: Checkout Source Code
@@ -17,23 +17,27 @@ jobs:
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '8' # Força o Java antigo que o Gradle do projeto exige
+        java-version: '8'
 
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
 
     - name: Install Specific NDK
       run: |
-        sdkmanager --install "ndk;21.4.7075529" # Versão do NDK compatível com projetos antigos
+        sdkmanager --install "ndk;21.4.7075529"
 
     - name: Build APK
       run: |
         cd src/platform/android || cd src/android || cd .
         chmod +x gradlew
         ./gradlew assembleDebug
-      env:
-        ANDROID_NDK_HOME: ${{ steps.setup-android.outputs.sdk-path }}/ndk/21.4.7075529
 
+    - name: Upload Finished APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: OpenLara-APK-Corrigido
+        path: |
+          **/*.apk
     - name: Upload Finished APK
       uses: actions/upload-artifact@v4
       with:
