@@ -1,0 +1,39 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch: # Permite que você ative a compilação manualmente por um botão
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive # Baixa também as dependências internas do projeto, se houver
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Setup Android SDK & NDK
+      uses: android-actions/setup-android@v3
+
+    - name: Grant Execute Permission for Gradle
+      run: chmod +x src/platform/android/gradlew
+      continue-on-error: true # Caso o caminho seja ligeiramente diferente ou já tenha permissão
+
+    - name: Build APK with Gradle
+      run: |
+        cd src/platform/android || cd src/android || cd .
+        ./gradlew assembleDebug
+      
+    - name: Upload Finished APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: OpenLara-APK
+        path: |
+          **/*.apk
